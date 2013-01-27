@@ -8,11 +8,11 @@ fi;
 
 BUCKET=$1
 TMP_DIR="/tmp/s3-jekyll-deploy/"
-SHA_LIST="$TMP_DIR/$BUCKET"
+HASH_LIST="$TMP_DIR/$BUCKET"
 
 if [ ! -d $TMP_DIR ]; then
 	mkdir $TMP_DIR;
-	touch $SHA_LIST;
+	touch $HASH_LIST;
 fi;
 
 cd _site
@@ -36,13 +36,13 @@ typeFor(){
 }
 
 for FILE in `find . -type f`; do
-	SHA=$(shasum $FILE | cut -d" " -f 1)
-	if ! grep -Fxq $SHA $SHA_LIST ; then
+	HASH=$(md5 $FILE | cut -d" " -f 4)
+	if ! grep -Fxq $HASH $HASH_LIST ; then
 		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
 		echo "Deploying $S3_NAME"
         typeFor $FILE
         ~/bin/aws/aws put "x-amz-acl: public-read" "Content-Type: $CONTENT_TYPE" $BUCKET $S3_NAME;
-		echo $SHA >> $SHA_LIST
+		echo $HASH >> $HASH_LIST
 	fi;
 done;
 
