@@ -15,10 +15,10 @@ if [ ! -d $TMP_DIR ]; then
 	touch $HASH_LIST;
 fi;
 
-MD5=$(whereis md5sum)
+MD5=/usr/bin/md5sum
 
-if [ -z "$MD5" ]; then
-	MD5="$(whereis md5) -r"
+if [ ! -f $MD5  ]; then
+	MD5="/sbin/md5 -r"
 fi;
 
 cd _site
