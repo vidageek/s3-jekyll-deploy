@@ -15,6 +15,12 @@ if [ ! -d $TMP_DIR ]; then
 	touch $HASH_LIST;
 fi;
 
+MD5=$(whereis md5sum)
+
+if [ -z "$MD5" ]; then
+	MD5="$(whereis md5) -r"
+fi;
+
 cd _site
 
 typeFor(){
@@ -36,7 +42,7 @@ typeFor(){
 }
 
 for FILE in `find . -type f`; do
-	HASH=$(md5 $FILE | cut -d" " -f 4)
+	HASH=$($MD5 $FILE | cut -d" " -f 1)
 	if ! grep -Fxq $HASH $HASH_LIST ; then
 		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
 		echo "Deploying $S3_NAME"
