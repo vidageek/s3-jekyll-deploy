@@ -25,7 +25,9 @@ cd _site
 
 typeFor(){
         TYPE=`echo $1 | sed -E "s/.+\.([^$]+)$/\1/"`
-        CONTENT_TYPE="text/html"
+        CONTENT_TYPE="text/plain"
+        if [ $TYPE == "htm" ]; then CONTENT_TYPE="text/html"; fi;
+        if [ $TYPE == "html" ]; then CONTENT_TYPE="text/html"; fi;
         if [ $TYPE == "txt" ]; then CONTENT_TYPE="text/plain"; fi;
         if [ $TYPE == "xml" ]; then CONTENT_TYPE="application/xml"; fi;
         if [ $TYPE == "css" ]; then CONTENT_TYPE="text/css"; fi;
