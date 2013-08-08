@@ -1,10 +1,8 @@
 #! /bin/bash
 
-if [ $1 == 'help' ]; then
-	echo "Usage:"
-	echo "s3-jekyll-deploy BUCKET_NAME"
-	exit 0
-fi;
+BUCKET=$1
+TMP_DIR="/tmp/s3-jekyll-deploy/"
+HASH_LIST="$TMP_DIR/$BUCKET"
 
 function calcula_md5 {
     FILE=$1
@@ -14,35 +12,6 @@ function calcula_md5 {
         HASH=`/sbin/md5 -r $FILE | cut -d" " -f 1`
     fi;
 }
-
-BUCKET=$1
-TMP_DIR="/tmp/s3-jekyll-deploy/"
-HASH_LIST="$TMP_DIR/$BUCKET"
-
-if [ ! -d $TMP_DIR ]; then
-	mkdir $TMP_DIR;
-	touch $HASH_LIST;
-fi;
-
-
-cd _site
-
-CSS_LIST=`find . -iname "*.css"`
-
-IFS_BAK=$IFS
-IFS="
-"
-
-for CSS in $CSS_LIST; do
-    calcula_md5 $CSS
-    CSS_URL=${CSS:1}
-    CSS_COM_HASH="$CSS_URL?v=$HASH"
-    echo "Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
-    find . -name '*.html' -type f -exec sed -i "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
-done;
-
-IFS=$IFS_BAK
-IFS_BAK=
 
 typeFor(){
         TYPE=`echo $1 | sed -E "s/.+\.([^$]+)$/\1/"`
@@ -64,17 +33,60 @@ typeFor(){
         if [ $TYPE == "pdf" ]; then CONTENT_TYPE="application/pdf"; fi;
 }
 
-for FILE in `find . -type f`; do
-    calcula_md5 $FILE
-	if ! grep -Fxq $HASH $HASH_LIST ; then
-		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
-		echo "Deploying $S3_NAME"
-        typeFor $FILE
-        ~/bin/aws/aws put "x-amz-acl: public-read" "Content-Type: $CONTENT_TYPE" $BUCKET $S3_NAME;
-		echo $HASH >> $HASH_LIST
-	fi;
+function deploy_files {
+    for FILE in $@; do
+        calcula_md5 $FILE
+	    if ! grep -Fxq $HASH $HASH_LIST ; then
+    		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
+            typeFor $FILE
+	    	echo "Deploying $S3_NAME with Content-Type $CONTENT_TYPE"
+            #~/bin/aws/aws put "x-amz-acl: public-read" "Content-Type: $CONTENT_TYPE" $BUCKET $S3_NAME;
+		    echo $HASH >> $HASH_LIST
+	    fi;
+    done;
+}
+
+if [ $1 == 'help' ]; then
+	echo "Usage:"
+	echo "s3-jekyll-deploy BUCKET_NAME"
+	exit 0
+fi;
+
+
+if [ ! -d $TMP_DIR ]; then
+	mkdir $TMP_DIR;
+	touch $HASH_LIST;
+fi;
+
+
+cd _site
+
+CSS_LIST=`find . -iname "*.css"`
+
+IFS_BAK=$IFS
+IFS="
+"
+
+for CSS in $CSS_LIST; do
+    calcula_md5 $CSS
+    CSS_URL=${CSS:1}
+    CSS_COM_HASH="$CSS_URL?v=$HASH"
+    echo "################### Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
+    find . -name '*.html' -type f -exec sed -i '' "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
 done;
 
-echo "Deploy terminado"
+IFS=$IFS_BAK
+IFS_BAK=
+
+echo "################### Deploying recursos"
+deploy_files `find . -type f | grep -v "\.html" | grep -v "\.xml" ` 
+echo "################### Deploying html"
+deploy_files `find . -type f -iname "*.html" | grep -v "^./index.html"`
+echo "################### Deploying raiz"
+deploy_files "./index.html"
+echo "################### Deploying xml"
+deploy_files `find . -type f -iname "*.xml"`
+
+echo "################### Deploy terminado"
 
 cd ..
