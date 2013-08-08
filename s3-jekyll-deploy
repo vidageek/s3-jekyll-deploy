@@ -40,7 +40,7 @@ function deploy_files {
     		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
             typeFor $FILE
 	    	echo "Deploying $S3_NAME with Content-Type $CONTENT_TYPE"
-            #~/bin/aws/aws put "x-amz-acl: public-read" "Content-Type: $CONTENT_TYPE" $BUCKET $S3_NAME;
+            ~/bin/aws/aws put "x-amz-acl: public-read" "Content-Type: $CONTENT_TYPE" $BUCKET $S3_NAME;
 		    echo $HASH >> $HASH_LIST
 	    fi;
     done;
@@ -72,7 +72,7 @@ for CSS in $CSS_LIST; do
     CSS_URL=${CSS:1}
     CSS_COM_HASH="$CSS_URL?v=$HASH"
     echo "################### Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
-    find . -name '*.html' -type f -exec sed -i '' "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
+    find . -name '*.html' -type f -exec sed -i "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
 done;
 
 IFS=$IFS_BAK
