@@ -44,8 +44,6 @@ done;
 IFS=$IFS_BAK
 IFS_BAK=
 
-exit 0
-
 typeFor(){
         TYPE=`echo $1 | sed -E "s/.+\.([^$]+)$/\1/"`
         CONTENT_TYPE="text/plain"
