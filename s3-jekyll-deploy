@@ -6,6 +6,15 @@ if [ $1 == 'help' ]; then
 	exit 0
 fi;
 
+function calcula_md5 {
+    FILE=$1
+    if [ -f "/usr/bin/md5sum"  ]; then
+        HASH=`/usr/bin/md5sum $FILE | cut -d" " -f 1`
+    else
+        HASH=`/sbin/md5 -r $FILE | cut -d" " -f 1`
+    fi;
+}
+
 BUCKET=$1
 TMP_DIR="/tmp/s3-jekyll-deploy/"
 HASH_LIST="$TMP_DIR/$BUCKET"
@@ -15,13 +24,27 @@ if [ ! -d $TMP_DIR ]; then
 	touch $HASH_LIST;
 fi;
 
-MD5=/usr/bin/md5sum
-
-if [ ! -f $MD5  ]; then
-	MD5="/sbin/md5 -r"
-fi;
 
 cd _site
+
+CSS_LIST=`find . -iname "*.css"`
+
+IFS_BAK=$IFS
+IFS="
+"
+
+for CSS in $CSS_LIST; do
+    calcula_md5 $CSS
+    CSS_URL=${CSS:1}
+    CSS_COM_HASH="$CSS_URL?v=$HASH"
+    echo "Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
+    find . -name '*.html' -type f -exec sed -i '' "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
+done;
+
+IFS=$IFS_BAK
+IFS_BAK=
+
+exit 0
 
 typeFor(){
         TYPE=`echo $1 | sed -E "s/.+\.([^$]+)$/\1/"`
@@ -44,7 +67,7 @@ typeFor(){
 }
 
 for FILE in `find . -type f`; do
-	HASH=$($MD5 $FILE | cut -d" " -f 1)
+    calcula_md5 $FILE
 	if ! grep -Fxq $HASH $HASH_LIST ; then
 		S3_NAME=$(echo $FILE | sed -E "s/\.\///")
 		echo "Deploying $S3_NAME"
