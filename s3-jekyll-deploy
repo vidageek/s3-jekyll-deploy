@@ -38,7 +38,7 @@ for CSS in $CSS_LIST; do
     CSS_URL=${CSS:1}
     CSS_COM_HASH="$CSS_URL?v=$HASH"
     echo "Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
-    find . -name '*.html' -type f -exec sed -i '' "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
+    find . -name '*.html' -type f -exec sed -i "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
 done;
 
 IFS=$IFS_BAK
