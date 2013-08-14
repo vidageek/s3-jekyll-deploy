@@ -16,6 +16,7 @@ function calcula_md5 {
 typeFor(){
         TYPE=`echo $1 | sed -E "s/.+\.([^$]+)$/\1/"`
         CONTENT_TYPE="text/plain"
+        if [ $TYPE == "csv" ]; then CONTENT_TYPE="text/csv"; fi;
         if [ $TYPE == "htm" ]; then CONTENT_TYPE="text/html"; fi;
         if [ $TYPE == "html" ]; then CONTENT_TYPE="text/html"; fi;
         if [ $TYPE == "txt" ]; then CONTENT_TYPE="text/plain"; fi;
