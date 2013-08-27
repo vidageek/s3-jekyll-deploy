@@ -63,17 +63,18 @@ fi;
 cd _site
 
 CSS_LIST=`find . -iname "*.css"`
+JS_LIST=`find . -iname "*.js"`
 
 IFS_BAK=$IFS
 IFS="
 "
 
-for CSS in $CSS_LIST; do
-    calcula_md5 $CSS
-    CSS_URL=${CSS:1}
-    CSS_COM_HASH="$CSS_URL?v=$HASH"
-    echo "################### Trocando ocorrências de [$CSS_URL] por [$CSS_COM_HASH]"
-    find . -name '*.html' -type f -exec sed -i "s#$CSS_URL#$CSS_COM_HASH#" {} ";"
+for ASSET in $CSS_LIST $JS_LIST; do
+    calcula_md5 $ASSET
+    ASSET_URL=${ASSET:1}
+    ASSET_COM_HASH="$ASSET_URL?v=$HASH"
+    echo "################### Trocando ocorrências de [$ASSET_URL] por [$ASSET_COM_HASH]"
+    find . -name '*.html' -type f -exec sed -i "" "s#$ASSET_URL#$ASSET_COM_HASH#" {} ";"
 done;
 
 IFS=$IFS_BAK
