@@ -39,7 +39,7 @@ done;
 IFS=$IFS_BAK
 IFS_BAK=
 
-aws --size-only s3 sync . s3://www.vidageek.net/ --acl "public-read" 
+aws --size-only s3 sync . s3://$BUCKET/ --acl "public-read" 
 
 echo "################### Deploy terminado"
 
