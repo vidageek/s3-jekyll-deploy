@@ -39,6 +39,15 @@ done;
 IFS=$IFS_BAK
 IFS_BAK=
 
+echo "################### Gzip em html"
+
+for X in `find . -iname *.html`; do 
+  gzip $X; 
+  mv $X.gz $X; 
+done;
+
+echo "################### Deploying"
+
 aws --size-only s3 sync . s3://$BUCKET/ --acl "public-read" 
 
 echo "################### Deploy terminado"
