@@ -41,7 +41,7 @@ IFS_BAK=
 
 echo "################### Gzip em html"
 
-for X in `find . -iname *.html`; do 
+for X in `find . -type f`; do 
   gzip $X; 
   mv $X.gz $X; 
 done;
